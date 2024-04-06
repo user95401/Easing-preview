@@ -7,7 +7,7 @@ using namespace geode::prelude;
 EffectGameObject* m_trigger;
 SetupTriggerPopup* m_triggerPopup;
 float m_scale;
-
+int touchPriority = -600;
 
 const char* getEasingName(int id) {
     switch (id) {
@@ -29,26 +29,6 @@ const char* getEasingName(int id) {
 		case 16: return "Back In Out";
         case 17: return "Back In";
         case 18: return "Back Out";
-			// customs
-        case 19: return "Ease In Out Quart";
-        case 20: return "Ease In Quart";
-        case 21: return "Ease Out Quart";
-		case 22: return "Ease In Out Cubic";
-        case 23: return "Ease In Cubic";
-        case 24: return "Ease Out Cubic";
-		case 25: return "Ease In Out Linear";
-        case 26: return "Ease In Linear";
-        case 27: return "Ease Out Linear";
-			// customs 2
-		case 28: return "Elastic In Out Quart";
-        case 29: return "Elastic In Quart";
-        case 30: return "Elastic Out Quart";
-		case 31: return "Elastic In Out Cubic";
-        case 32: return "Elastic In Cubic";
-        case 33: return "Elastic Out Cubic";
-		case 34: return "Elastic In Out Linear";
-        case 35: return "Elastic In Linear";
-        case 36: return "Elastic Out Linear";
         default: return "None";
     }
 }
@@ -148,8 +128,8 @@ public:
 		this->setKeypadEnabled(true);
 		this->setTouchEnabled(true);
 		this->setTouchMode(ccTouchesMode::kCCTouchesOneByOne);
-		this->setPreviousPriority(-504);
-		this->setTouchPriority(-504);
+		this->setPreviousPriority(touchPriority);
+		this->setTouchPriority(touchPriority);
 
 		auto s = CCDirector::sharedDirector()->getWinSize();
 
@@ -159,11 +139,11 @@ public:
 		this->addChild(bg, -1);
 
 		auto menu = CCMenu::create();
-		menu->setTouchPriority(-504);
+		menu->setTouchPriority(touchPriority);
 		this->addChild(menu);
 
-		auto closeBtn = CCMenuItemSpriteExtra::create(ButtonSprite::create("Ok", 40.0f, true, "goldFont.fnt", "GJ_button_01.png", 30.0f, 0.8f), this, menu_selector(Easing::onClose));
-        closeBtn->setPosition({ 0, -bg->getContentSize().height / 2 + 25 });
+		auto closeBtn = CCMenuItemSpriteExtra::create(ButtonSprite::create("OK", 40.0f, true, "goldFont.fnt", "GJ_button_01.png", 30.0f, 0.8f), this, menu_selector(Easing::onClose));
+        closeBtn->setPosition({ 0, -bg->getContentSize().height / 2 + 24 });
         menu->addChild(closeBtn);
 
 		auto title = CCLabelBMFont::create("Easing Preview", "goldFont.fnt");
@@ -183,11 +163,6 @@ public:
 		auto rightArrow = CCMenuItemSpriteExtra::create(arrow_, this, menu_selector(Easing::onNext));
 		rightArrow->setPosition({bg->getContentSize().width / 2 + 15, 0});
 		menu->addChild(rightArrow);
-
-		auto infoBtn = CCMenuItemSpriteExtra::create(CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png"), this, menu_selector(Easing::onInfo));
-		infoBtn->setPosition({ -bg->getContentSize().width / 2 + 18, bg->getContentSize().height / 2 - 18 });
-		menu->addChild(infoBtn);
-
 
 		m_pagesText = CCLabelBMFont::create("(0 / 0)", "chatFont.fnt");
 		m_pagesText->setColor({0, 0, 0});
@@ -219,13 +194,6 @@ public:
 		this->updatePages();
 
 		return true;
-	}
-	void onInfo(CCObject*) {
-		const char* message = "You can select the type of easing by tapping on the preview";
-		#ifdef GEODE_IS_WINDOWS
-		message = "You can select the type of easing by clicking on the preview";
-		#endif
-		FLAlertLayer::create("Info", message, "OK")->show();
 	}
 	void onNext(CCObject*) {
 		m_currentPage++;
@@ -262,22 +230,21 @@ public:
 		m_trigger->m_easingType = (EasingType)toggle->getTag();
 		m_easingSelectedTxt->setString(CCString::createWithFormat("Selected: %s", getEasingName((int)m_trigger->m_easingType))->getCString());
 
-		//m_triggerPopup->valueChanged(30, 2.0f);
-		auto m_triggerEasing = reinterpret_cast<CCLabelBMFont*>(m_triggerPopup->m_mainLayer->getChildByID("easing-type"));
-		m_triggerEasing->setString(getEasingName(toggle->getTag()));
-		m_triggerEasing->limitLabelWidth(150.f * m_scale, 0.7f * m_scale, 0);
+		if (m_triggerPopup && CCScene::get()->getChildByID("trigger-popup"_spr)) {
+			auto m_triggerEasing = reinterpret_cast<CCLabelBMFont*>(m_triggerPopup->m_mainLayer->getChildByID("easing-type"));
+			m_triggerEasing->setString(getEasingName(toggle->getTag()));
+			m_triggerEasing->limitLabelWidth(150.f * m_scale, 0.7f * m_scale, 0);
 
-		auto m_triggerEasingRate = reinterpret_cast<CCMenuItemSpriteExtra*>(m_triggerPopup->m_buttonMenu->getChildByID("easing-rate-button"));
-		m_triggerEasingRate->setVisible(toggle->getTag() >= 1 && toggle->getTag() <= 6);
-
-		//m_triggerPopup->updateEaseRateLabel();
-		//return m_triggerPopup->toggleEaseRateVisibility();
+			auto m_triggerEasingRate = reinterpret_cast<CCMenuItemSpriteExtra*>(m_triggerPopup->m_buttonMenu->getChildByID("easing-rate-button"));
+			m_triggerEasingRate->setVisible(toggle->getTag() >= 1 && toggle->getTag() <= 6);
+		}
+        else this->onClose(nullptr);
 	}
 	void createPage(int start, int end) {
 		auto s = CCDirector::sharedDirector()->getWinSize();
 
 		auto menu = CCMenu::create();
-		menu->setTouchPriority(-504);
+		menu->setTouchPriority(touchPriority);
 		menu->setPosition({0,0});
 
 		float padX = 0, padY = 0;
@@ -547,7 +514,7 @@ public:
 		this->removeMeAndCleanup();
 	}
 	void keyBackClicked() {
-		this->onClose(0);
+		this->onClose(nullptr);
 	}
 	void onEasingPopup(CCObject*) {
 		Easing::create()->show();
@@ -560,6 +527,7 @@ class $modify(Test, SetupTriggerPopup) {
 		SetupTriggerPopup::init(p0, p1, p2, p3, p4);
 
 		m_triggerPopup = this;
+		this->setID("trigger-popup"_spr);
 
 		if (LevelEditorLayer::get() && p0 && p1) {
 			if (p0 != nullptr)
@@ -569,7 +537,7 @@ class $modify(Test, SetupTriggerPopup) {
 		}
 		return true;
 	}
-	void createEasingControls(CCPoint p0, float p1, int p2, int p3) {
+	void createEasingControls(cocos2d::CCPoint p0, float p1, int p2, int p3) {
 		SetupTriggerPopup::createEasingControls(p0, p1, p2, p3);
 
 		if (LevelEditorLayer::get()) {
