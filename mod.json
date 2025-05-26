@@ -1,10 +1,12 @@
 {
-	"geode": "2.0.0-beta.21",
+	"geode": "4.4.0",
 	"gd": {
-		"android": "2.205",
-		"win": "2.204"
+		"win": "2.2074",
+		"android": "2.2074",
+		"mac": "2.2074",
+		"ios": "2.2074"
 	},
-	"version": "v1.0.1",
+	"version": "v1.0.2",
 	"id": "elsai.easing_preview",
 	"name": "Easing preview",
 	"developer": "elSai",

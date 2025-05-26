@@ -1,3 +1,3 @@
-# Easingpreview
+# Easing Preview
 
-This is where she makes a mod.
+You can see a preview of easing animations, it helps you know what kind of movement it makes
